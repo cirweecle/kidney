@@ -41,7 +41,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 }])
 .constant('CONFIG', {
   baseUrl: 'http://121.43.107.106:4060/api/v1/',
-  baseTwoUrl: 'http://121.43.107.106:4060/api/v1/',
+  baseTwoUrl: 'http://121.43.107.106:4060/api/v2/',
   mediaUrl: 'http://121.43.107.106:8054/',
   socketServer: 'ws://121.43.107.106:4060/',
   imgThumbUrl: 'http://121.43.107.106:8054/uploads/photos/resize',
@@ -397,7 +397,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   var Doctor = function () {
     return $resource(CONFIG.baseUrl + ':path/:route', {path: 'doctor'}, {
       postDocBasic: {method: 'POST', params: {route: 'detail'}, timeout: 100000},
-      getPatientList: {method: 'GET', params: {route: 'myPatients'}, timeout: 100000},
+      // getPatientList: {method: 'GET', params: {route: 'myPatients'}, timeout: 100000},
       getDoctorInfo: {method: 'GET', params: {route: 'detail'}, timeout: 100000},
       getMyGroupList: {method: 'GET', params: {route: 'myTeams'}, timeout: 100000},
       getGroupPatientList: {method: 'GET', params: {route: 'teamPatients'}, timeout: 100000},
@@ -420,7 +420,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
     return $resource(CONFIG.baseUrl + ':path/:route', {path: 'user'}, {
       register: {method: 'POST', params: {route: 'register', phoneNo: '@phoneNo', password: '@password', role: '@role'}, timeout: 100000},
       changePassword: {method: 'POST', params: {route: 'reset', phoneNo: '@phoneNo', password: '@password'}, timeout: 100000},
-      logIn: {method: 'POST', params: {route: 'login'}, timeout: 100000},
+      logIn: {method: 'POST', skipAuthorization: true, params: {route: 'login'}, timeout: 100000},
       logOut: {method: 'POST', params: {route: 'logout', userId: '@userId'}, timeout: 100000},
       getUserId: {method: 'GET', params: {route: 'userID', username: '@username'}, timeout: 100000},
       sendSMS: {method: 'POST', params: {route: 'sms', mobile: '@mobile', smsType: '@smsType'}, timeout: 100000}, // 第一次验证码发送成功返回结果为”User doesn't exist“，如果再次发送才返回”验证码成功发送“
@@ -466,7 +466,8 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   var Message = function () {
     return $resource(CONFIG.baseUrl + ':path/:route', {path: 'message'}, {
-      getMessages: {method: 'GET', params: {route: 'messages'}, timeout: 100000}
+      getMessages: {method: 'GET', params: {route: 'messages'}, timeout: 100000},
+      insertMessages: {method: 'POST', params: {route: 'message'}, timeout: 100000}
     })
   }
 
@@ -501,9 +502,15 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
     })
   }
 
-  var Expense = function () {
-    return $resource(CONFIG.baseUrl + ':path/:route', {path: 'expense'}, {
-      getDocRecords: {method: 'GET', params: {route: 'docRecords'}, timeout: 100000}
+  // var Expense = function () {
+  //   return $resource(CONFIG.baseUrl + ':path/:route', {path: 'expense'}, {
+  //     getDocRecords: {method: 'GET', params: {route: 'docRecords'}, timeout: 100000}
+  //   })
+  // }
+
+  var Order = function () {
+    return $resource(CONFIG.baseTwoUrl + ':path/:route', {path: 'order'}, {
+      order: {method: 'GET', params: {route: 'order'}, timeout: 100000}
     })
   }
 
@@ -534,6 +541,28 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
     })
   }
 
+  var services = function () {
+    return $resource(CONFIG.baseTwoUrl + ':path/:route', {path: 'services'}, {
+      setSchedules: {method: 'POST', params: {route: 'setSchedule'}, timeout: 100000},
+      getStatus: {method: 'GET', params: {}, timeout: 100000},
+      setStatus: {method: 'POST', params: {route: 'status'}, timeout: 100000},
+      setCharge: {method: 'POST', params: {route: 'charge'}, timeout: 100000},
+      getSchedules: {method: 'GET', params: {route: 'mySchedules'}, timeout: 100000},
+      deleteSchedules: {method: 'POST', params: {route: 'deleteSchedule'}, timeout: 100000},
+      relayTarget: {method: 'POST', params: {route: 'relayTarget'}, timeout: 100000},
+      deleteSuspend: {method: 'POST', params: {route: 'deleteSuspend'}, timeout: 100000},
+      setSuspend: {method: 'POST', params: {route: 'setSuspend'}, timeout: 100000}
+    })
+  }
+
+  var Doctor2 = function () {
+    return $resource(CONFIG.baseTwoUrl + ':path/:route', {path: 'doctor'}, {
+      getReviewList: {method: 'GET', params: {route: 'myPatientsToReview'}, timeout: 100000},
+      saveReviewInfo: {method: 'POST', params: {route: 'PatientInCharge'}, timeout: 100000},
+      getPatientList: {method: 'GET', params: {route: 'myPatients'}, timeout: 100000}
+    })
+  }
+
   serve.abort = function ($scope) {
     abort.resolve()
     $interval(function () {
@@ -555,10 +584,13 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
       serve.Mywechat = Mywechat()
       serve.Insurance = Insurance()
       serve.New = New()
-      serve.Expense = Expense()
+      // serve.Expense = Expense()
+      serve.Order = Order()
       serve.Advice = Advice()
       serve.version = version()
       serve.labtestImport = labtestImport()
+      serve.services = services()
+      serve.Doctor2 = Doctor2()
     }, 0, 1)
   }
   serve.Dict = Dict()
@@ -578,10 +610,13 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   serve.Mywechat = Mywechat()
   serve.Insurance = Insurance()
   serve.New = New()
-  serve.Expense = Expense()
+  // serve.Expense = Expense()
+  serve.Order = Order()
   serve.Advice = Advice()
   serve.version = version()
   serve.labtestImport = labtestImport()
+  serve.services = services()
+  serve.Doctor2 = Doctor2()
   return serve
 }])
 .factory('Dict', ['$q', 'Data', function ($q, Data) {
@@ -769,6 +804,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   return self
 }])
+
 .factory('Compliance', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->{
@@ -809,6 +845,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   }
   return self
 }])
+
 .factory('Communication', ['$q', 'Data', 'Storage', function ($q, Data, Storage) {
   var self = this
     // params->0:{
@@ -992,6 +1029,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   return self
 }])
+
 .factory('User', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->{
@@ -1284,6 +1322,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   }
   return self
 }])
+
 .factory('Message', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{
@@ -1302,8 +1341,23 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
             })
     return deferred.promise
   }
+
+  self.insertMessages = function (params) {
+    var deferred = $q.defer()
+    Data.Message.insertMessages(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
   return self
 }])
+
 .factory('Account', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{userId:'p01'}
@@ -1345,6 +1399,24 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   }
   return self
 }])
+
+.factory('Order', ['$q', 'Data', function ($q, Data) {
+  var self = this
+  self.order = function (params) {
+    var deferred = $q.defer()
+    Data.Order.order(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+  return self
+}])
+
 .factory('VitalSign', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{userId:'p01',type:'type1'}
@@ -1362,6 +1434,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   }
   return self
 }])
+
 .factory('Comment', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{userId:'doc01'}
@@ -1379,6 +1452,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   }
   return self
 }])
+
 .factory('Patient', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{userId:'p01'}
@@ -1516,6 +1590,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   return self
 }])
+
 .factory('Doctor', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{
@@ -1548,18 +1623,18 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
     // params->0:{
        //   userId:'doc01'
        // }
-  self.getPatientList = function (params) {
-    var deferred = $q.defer()
-    Data.Doctor.getPatientList(
-            params,
-            function (data, headers) {
-              deferred.resolve(data)
-            },
-            function (err) {
-              deferred.reject(err)
-            })
-    return deferred.promise
-  }
+  // self.getPatientList = function (params) {
+  //   var deferred = $q.defer()
+  //   Data.Doctor.getPatientList(
+  //           params,
+  //           function (data, headers) {
+  //             deferred.resolve(data)
+  //           },
+  //           function (err) {
+  //             deferred.reject(err)
+  //           })
+  //   return deferred.promise
+  // }
 
     // params->0:{
        //   userId:'doc01'
@@ -1816,6 +1891,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   return self
 }])
+
 .factory('Counsel', ['$q', 'Data', function ($q, Data) {
   var self = this
     // params->0:{userId:'doc01',status:1}
@@ -2185,6 +2261,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
 
   return self
 }])
+
 .factory('socket', ['$rootScope', 'socketFactory', 'CONFIG', function ($rootScope, socketFactory, CONFIG) {
   var myIoSocket = io.connect(CONFIG.socketServer + 'chat')
 
@@ -2266,7 +2343,7 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
         color: '1199dd'
       }
     }
-    return $cordovaLocalNotification.schedule(note)
+    return $cordovaLocalNotification.add(note)
   }
   return {
     add: function (msg) {
@@ -2420,6 +2497,170 @@ angular.module('kidney.services', ['ionic', 'ngResource'])
   self.getLabtestImport = function (params) {
     var deferred = $q.defer()
     Data.labtestImport.getLabtestImport(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+  return self
+}])
+
+.factory('services', ['$q', 'Data', function ($q, Data) {
+  var self = this
+  self.setSchedules = function (params) {
+    var deferred = $q.defer()
+    Data.services.setSchedules(
+           params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.setStatus = function (params) {
+    var deferred = $q.defer()
+    Data.services.setStatus(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.setCharge = function (params) {
+    var deferred = $q.defer()
+    Data.services.setCharge(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.getStatus = function (params) {
+    var deferred = $q.defer()
+    Data.services.getStatus(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.getSchedules = function (params) {
+    var deferred = $q.defer()
+    Data.services.getSchedules(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.deleteSchedules = function (params) {
+    var deferred = $q.defer()
+    Data.services.deleteSchedules(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.relayTarget = function (params) {
+    var deferred = $q.defer()
+    Data.services.relayTarget(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.deleteSuspend = function (params) {
+    var deferred = $q.defer()
+    Data.services.deleteSuspend(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.setSuspend = function (params) {
+    var deferred = $q.defer()
+    Data.services.setSuspend(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+  return self
+}])
+
+.factory('Doctor2', ['$q', 'Data', function ($q, Data) {
+  var self = this
+  self.getReviewList = function (params) {
+    var deferred = $q.defer()
+    Data.Doctor2.getReviewList(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.saveReviewInfo = function (params) {
+    var deferred = $q.defer()
+    Data.Doctor2.saveReviewInfo(
+            params,
+            function (data, headers) {
+              deferred.resolve(data)
+            },
+            function (err) {
+              deferred.reject(err)
+            })
+    return deferred.promise
+  }
+
+  self.getPatientList = function (params) {
+    var deferred = $q.defer()
+    Data.Doctor2.getPatientList(
             params,
             function (data, headers) {
               deferred.resolve(data)
