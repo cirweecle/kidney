@@ -9,6 +9,7 @@ angular.module('kidney', [
   'tdy.controllers',
   'xjz.controllers',
   'zy.controllers',
+  'fyl.controllers',
   'kidney.services',
   'kidney.filters',
   'kidney.directives',
@@ -453,6 +454,15 @@ angular.module('kidney', [
     // views-tab-patient
 
     // 患者详情页面
+    .state('tab.Report',{
+      url: '/Report',
+      views: {
+        'tab-patient':{
+          controller: 'ReportCtrl',
+          templateUrl: 'partials/patient/Report.html'
+        }
+      }
+    })
     .state('tab.patientDetail', {
       cache: false,
       url: '/patientDetail',
@@ -543,7 +553,16 @@ angular.module('kidney', [
         }
       }
     })
-
+   .state('tab.GroupMessage', {
+        // cache: false,
+     url: '/GroupMessage',
+     views: {
+       'tab-patient': {
+         controller: 'GroupMessageCtrl',
+         templateUrl: 'partials/patient/GroupMessage.html'
+       }
+     }
+   })
     // views-tab-groups
     .state('tab.new-group', {
       url: '/newgroup',
